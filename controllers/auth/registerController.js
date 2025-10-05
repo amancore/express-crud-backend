@@ -60,7 +60,7 @@ const registerController = {
 		} catch (err) {
 			return next(err);
 		}
-		console.log(access_token, refresh_token);
+		// console.log(access_token, refresh_token);
 		// 5. send a response
 		res.json({ access_token, refresh_token });
 	},

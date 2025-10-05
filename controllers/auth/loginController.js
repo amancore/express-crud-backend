@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { User,RefreshToken } from "../../models/index.js";
+import { User, RefreshToken } from "../../models/index.js";
 import bcrypt from "bcrypt";
 import JwtService from "../../services/JwtService.js";
 import CustomErrorHandler from "../../services/CustomErrorHandler.js";
@@ -49,6 +49,22 @@ const loginController = {
 			res.json({ access_token, refresh_token });
 		} catch (err) {
 			return next(err);
+		}
+	},
+	async logout(req, res, next) {
+		// validation
+		const refreshSchema = Joi.object({
+			refresh_token: Joi.string().required(),
+		});
+		const { error } = refreshSchema.validate(req.body);
+		if (error) {
+			return next(error);
+		}
+		try {
+			await RefreshToken.deleteOne({ token: req.body.refresh_token });
+			res.json({ status: "success", message: "Logged out successfully" });
+		} catch (err) {
+			return next(new Error("Something went wrong in db" + err.message));
 		}
 	},
 };

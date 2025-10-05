@@ -22,6 +22,8 @@ const refreshController = {
 			refreshtoken = await RefreshToken.findOne({
 				token: req.body.refresh_token,
 			});
+			console.log("🚀 ~ refresh ~ refreshtoken:", refreshtoken);
+
 			if (!refreshtoken) {
 				return next(CustomErrorHandler.unAuthorized("Invalid refresh token"));
 			}
@@ -33,27 +35,29 @@ const refreshController = {
 					refreshtoken.token,
 					REFRESH_SECRET
 				);
-				userId = _id
+				userId = _id;
 			} catch (err) {
 				return next(CustomErrorHandler.unAuthorized("Invalid refresh token"));
 			}
+			console.log("🚀 ~ refresh ~ userId:", userId);
 			// token generate
-			const user = User.findOne({_id : userId});
+			const user = User.findOne({ _id: userId });
 			if (!user) {
 				return next(CustomErrorHandler.unAuthorized("No user found!"));
 			}
 			const access_token = JwtService.sign({ _id: userId, role: user.role });
-			const refresh_token = JwtService.sign({ _id: userId, role: user.role }, "1y", REFRESH_SECRET);
+			const refresh_token = JwtService.sign(
+				{ _id: userId, role: user.role },
+				"1y",
+				REFRESH_SECRET
+			);
 			// database whitelist
 			await RefreshToken.create({ token: refresh_token });
 			res.json({ access_token, refresh_token });
-
 		} catch (err) {
 			return next(new Error("Something went wrong" + err.message));
 		}
+		res.json({ status: 1 });
 	},
 };
 export default refreshController;
-
-// git remote add origin https://github.com/amancore/express-crud-backend.git && git add . && git commit -m "pushing code to the github" && git push -u origin main
-
